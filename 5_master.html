@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>퀴블러-로스의 죽음 적응 5단계 Master - 비눗방울 게임</title>
+    <style>
+        :root {
+            --bg-grad-1: #0f172a;
+            --bg-grad-2: #1e1b4b;
+            --surface: #ffffff;
+            --surface-sub: #f8fafc;
+            --primary: #8b5cf6;
+            --primary-dark: #7c3aed;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --danger: #ef4444;
+            --gold: #f59e0b;
+            --radius-lg: 18px;
+            --radius-md: 12px;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-grad-1), var(--bg-grad-2));
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 12px;
+            overflow: hidden;
+        }
+
+        #app-container {
+            width: 100%;
+            max-width: 480px;
+            height: 92vh;
+            max-height: 820px;
+            background-color: var(--surface);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .screen {
+            display: none;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+            animation: fadeIn 0.25s ease-in-out;
+            position: relative;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 10px rgba(139, 92, 246, 0.3);
+        }
+
+        .btn:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 14px rgba(139, 92, 246, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background-color: #64748b;
+            box-shadow: 0 4px 10px rgba(100, 116, 139, 0.2);
+        }
+        .btn-secondary:hover { background-color: #475569; }
+
+        #title-screen {
+            align-items: center;
+            justify-content: space-between;
+            text-align: center;
+            padding: 28px 20px;
+        }
+
+        .logo-area {
+            margin-top: 10px;
+        }
+
+        .logo-bubble {
+            font-size: 4rem;
+            display: inline-block;
+            animation: float 3s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-12px) scale(1.05); }
+        }
+
+        .badge {
+            background: #f3e8ff;
+            color: var(--primary-dark);
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+
+        .stage-preview-list {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin: 16px 0;
+        }
+
+        .stage-preview-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 14px;
+            border-radius: var(--radius-md);
+            background-color: var(--surface-sub);
+            border-left: 5px solid #ccc;
+            text-align: left;
+            gap: 12px;
+        }
+
+        #game-screen {
+            padding: 12px;
+            gap: 8px;
+            justify-content: space-between;
+            background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 10px 16px;
+            border-radius: var(--radius-md);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .score-box {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .score-title {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 700;
+        }
+
+        .score-value {
+            font-size: 1.25rem;
+            font-weight: 900;
+            color: var(--primary-dark);
+        }
+
+        .next-preview {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--surface-sub);
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .preview-bubble {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            box-shadow: inset -2px -2px 4px rgba(0,0,0,0.1);
+        }
+
+        .canvas-wrapper {
+            position: relative;
+            flex: 1;
+            width: 100%;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.6);
+            border: 2px solid #cbd5e1;
+            box-shadow: inset 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            touch-action: none;
+        }
+
+        .modal-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.75);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-card {
+            background: #fff;
+            padding: 24px;
+            border-radius: var(--radius-lg);
+            text-align: center;
+            width: 85%;
+            max-width: 360px;
+            box-shadow: var(--shadow);
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        .dict-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 16px 0;
+            text-align: left;
+            max-height: 360px;
+            overflow-y: auto;
+        }
+
+        .dict-card {
+            padding: 12px;
+            border-radius: var(--radius-md);
+            border-left: 6px solid var(--primary);
+            background: var(--surface-sub);
+        }
+
+        .dict-card h4 {
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 4px;
+        }
+
+        .dict-card p {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            line-height: 1.35;
+        }
+
+        .grade-badge {
+            font-size: 3.2rem;
+            font-weight: 900;
+            color: var(--primary);
+            margin: 4px 0;
+            text-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin: 12px 0;
+        }
+
+        .stat-card {
+            background: var(--surface-sub);
+            padding: 10px;
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            border: 1px solid #e2e8f0;
+        }
+
+        .game-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .game-controls .btn {
+            flex: 1;
+            padding: 10px;
+            font-size: 0.9rem;
+        }
+
+        .level-badge {
+            background: #ede9fe;
+            color: #6d28d9;
+            font-size: 0.75rem;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 12px;
+            border: 1px solid #ddd6fe;
+        }
+
+        .btn-action {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);
+        }
+        .btn-action:hover {
+            background: linear-gradient(135deg, #d97706, #b45309);
+        }
+
+        @media (max-height: 650px) {
+            #app-container { height: 98vh; }
+            .logo-bubble { font-size: 3rem; }
+            .stage-preview-item { padding: 6px 10px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app-container">
+        <!-- 1. TITLE SCREEN -->
+        <section id="title-screen" class="screen active">
+            <div class="logo-area">
+                <span class="badge">고등학교 기술·가정 연계</span>
+                <div class="logo-bubble">🫧</div>
+                <h1 style="font-size: 1.5rem; margin-top: 4px;">죽음 적응 5단계 Master</h1>
+                <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 4px;">퀴블러-로스의 심리 변화 비눗방울 게임</p>
+            </div>
+
+            <div class="stage-preview-list">
+                <div class="stage-preview-item" style="border-left-color: #fbcfe8;">
+                    <span style="font-size: 1.2rem;">🙅‍♂️</span>
+                    <div>
+                        <strong style="font-size: 0.88rem;">1단계: 부정 (Denial)</strong>
+                        <p style="font-size: 0.75rem; color: var(--text-muted);">"아니야, 진단이 잘못된 거야!"</p>
+                    </div>
+                </div>
+                <div class="stage-preview-item" style="border-left-color: #fca5a5;">
+                    <span style="font-size: 1.2rem;">😡</span>
+                    <div>
+                        <strong style="font-size: 0.88rem;">2단계: 분노 (Anger)</strong>
+                        <p style="font-size: 0.75rem; color: var(--text-muted);">"왜 하필 나에게 이런 일이?!"</p>
+                    </div>
+                </div>
+                <div class="stage-preview-item" style="border-left-color: #fef08a;">
+                    <span style="font-size: 1.2rem;">🤲</span>
+                    <div>
+                        <strong style="font-size: 0.88rem;">3단계: 타협 (Bargaining)</strong>
+                        <p style="font-size: 0.75rem; color: var(--text-muted);">"삶을 조금만 연장해주신다면..."</p>
+                    </div>
+                </div>
+                <div class="stage-preview-item" style="border-left-color: #93c5fd;">
+                    <span style="font-size: 1.2rem;">😢</span>
+                    <div>
+                        <strong style="font-size: 0.88rem;">4단계: 우울 (Depression)</strong>
+                        <p style="font-size: 0.75rem; color: var(--text-muted);">"모든 것이 소용없어..."</p>
+                    </div>
+                </div>
+                <div class="stage-preview-item" style="border-left-color: #d8b4fe;">
+                    <span style="font-size: 1.2rem;">🕊️</span>
+                    <div>
+                        <strong style="font-size: 0.88rem;">5단계: 수용 (Acceptance)</strong>
+                        <p style="font-size: 0.75rem; color: var(--text-muted);">"이제 모든 걸 받아들일 준비가 되었어."</p>
+                    </div>
+                </div>
+            </div>
+
+            <div style="width: 100%; display: flex; flex-direction: column; gap: 8px;">
+                <button class="btn" onclick="startGame()">🎮 비눗방울 게임 시작</button>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn btn-secondary" style="flex: 1; font-size: 0.88rem;" onclick="openDict()">📖 5단계 학습 도감</button>
+                    <button class="btn btn-secondary" id="audio-toggle-btn" style="flex: 1; font-size: 0.88rem;" onclick="toggleAudio()">🔊 소리 쾀</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. GAME SCREEN -->
+        <section id="game-screen" class="screen">
+            <div class="game-header">
+                <div class="score-box">
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <span class="score-title">SCORE</span>
+                        <span id="diff-level-badge" class="level-badge">LV.1 Normal</span>
+                    </div>
+                    <span id="score-display" class="score-value">0</span>
+                </div>
+
+                <div class="next-preview">
+                    <span style="font-size: 0.75rem; font-weight: bold; color: var(--text-muted);">NEXT</span>
+                    <div id="next-bubble-preview" class="preview-bubble" style="background: #fbcfe8;">🙅‍♂️</div>
+                </div>
+
+                <div class="score-box" style="align-items: flex-end;">
+                    <span class="score-title">BEST</span>
+                    <span id="best-score-display" class="score-value" style="color: var(--text-muted);">0</span>
+                </div>
+            </div>
+
+            <div class="canvas-wrapper" id="canvas-container">
+                <canvas id="game-canvas"></canvas>
+            </div>
+
+            <div class="game-controls">
+                <button class="btn btn-action" id="shake-btn" onclick="triggerShockwave()" title="비눗방울을 흔들어 재배치합니다 (3회 제한)">💨 바람 (3)</button>
+                <button class="btn btn-secondary" onclick="pauseGame()">⏸️ 일시정지</button>
+                <button class="btn btn-secondary" onclick="openDict()">📖 도감</button>
+            </div>
+        </section>
+
+        <!-- 3. DICTIONARY MODAL -->
+        <div id="dict-modal" class="modal-overlay">
+            <div class="modal-card">
+                <h3>📖 퀴블러-로스 5단계 학습 도감</h3>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">죽음을 마주할 때 인간이 겪는 5가지 심리적 과정</p>
+                
+                <div class="dict-container">
+                    <div class="dict-card" style="border-left-color: #f472b6;">
+                        <h4>🙅‍♂️ 1단계: 부정 (Denial)</h4>
+                        <p>자신의 무서운 진단이나 죽음의 사실을 믿으려 하지 않고 거부하며, 잘못된 진단이라고 생각하는 단계입니다.</p>
+                    </div>
+                    <div class="dict-card" style="border-left-color: #ef4444;">
+                        <h4>😡 2단계: 분노 (Anger)</h4>
+                        <p>부정할 수 없는 현실을 깨닫고 "왜 하필 나인가?"라며 신, 의사, 가족, 세상에 분노와 원망을 분출하는 단계입니다.</p>
+                    </div>
+                    <div class="dict-card" style="border-left-color: #eab308;">
+                        <h4>🤲 3단계: 타협 (Bargaining)</h4>
+                        <p>죽음을 연장하거나 미루기 위해 신이나 주변 의료진과 협상(타협)하려 시도하는 단계입니다.</p>
+                    </div>
+                    <div class="dict-card" style="border-left-color: #3b82f6;">
+                        <h4>😢 4단계: 우울 (Depression)</h4>
+                        <p>더 이상 죽음을 피할 수 없음을 깨닫고 심한 상실감, 슬픔, 깊은 절망감과 우울에 빠지는 단계입니다.</p>
+                    </div>
+                    <div class="dict-card" style="border-left-color: #a855f7;">
+                        <h4>🕊️ 5단계: 수용 (Acceptance)</h4>
+                        <p>자신의 삶과 마무리를 인정하고 체념을 넘어 마음의 평온함과 기대 속에 죽음을 받아들이는 단계입니다.</p>
+                    </div>
+                </div>
+
+                <button class="btn" style="width: 100%;" onclick="closeDict()">닫기</button>
+            </div>
+        </div>
+
+        <!-- 4. PAUSE MODAL -->
+        <div id="pause-modal" class="modal-overlay">
+            <div class="modal-card">
+                <h2>⏸️ 게임 일시정지</h2>
+                <p style="margin: 12px 0; color: var(--text-muted); font-size: 0.9rem;">동일한 단계의 비눗방울을 합쳐서 마지막 [수용] 단계까지 완성해보세요!</p>
+                <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 16px;">
+                    <button class="btn" onclick="resumeGame()">▶️ 계속하기</button>
+                    <button class="btn btn-secondary" onclick="quitGame()">🚪 게임 종료</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. RESULT MODAL -->
+        <div id="result-modal" class="modal-overlay">
+            <div class="modal-card">
+                <h2>게임 결과</h2>
+                <div id="result-grade" class="grade-badge">A</div>
+                <p id="result-comment" style="font-size: 0.88rem; color: var(--text-muted);">훌륭합니다! 5단계 심리 과정을 잘 이해하셨네요.</p>
+
+                <div class="stats-grid">
+                    <div class="stat-card">최종 점수<br><strong id="res-score" style="font-size: 1.1rem; color: var(--primary-dark);">0</strong>점</div>
+                    <div class="stat-card">최고 콤보<br><strong id="res-combo" style="font-size: 1.1rem; color: var(--gold);">0</strong>회</div>
+                    <div class="stat-card">합성 성공<br><strong id="res-merges" style="font-size: 1.1rem; color: #10b981;">0</strong>회</div>
+                    <div class="stat-card">수용 완성<br><strong id="res-accepts" style="font-size: 1.1rem; color: #a855f7;">0</strong>개</div>
+                </div>
+
+                <div style="display: flex; gap: 8px; margin-top: 12px;">
+                    <button class="btn" style="flex: 1;" onclick="restartGame()">🔄 다시 하기</button>
+                    <button class="btn btn-secondary" style="flex: 1;" onclick="quitGame()">🏠 메인</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const STAGES = [
+            { level: 1, name: "부정", emoji: "🙅‍♂️", color: "#fbcfe8", stroke: "#f472b6", radius: 24, score: 10 },
+            { level: 2, name: "분노", emoji: "😡", color: "#fca5a5", stroke: "#ef4444", radius: 32, score: 20 },
+            { level: 3, name: "타협", emoji: "🤲", color: "#fef08a", stroke: "#eab308", radius: 42, score: 40 },
+            { level: 4, name: "우울", emoji: "😢", color: "#93c5fd", stroke: "#3b82f6", radius: 54, score: 80 },
+            { level: 5, name: "수용", emoji: "🕊️", color: "#d8b4fe", stroke: "#a855f7", radius: 68, score: 200 }
+        ];
+
+        class SoundFX {
+            constructor() {
+                this.ctx = null;
+                this.enabled = true;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    if (AudioContext) {
+                        this.ctx = new AudioContext();
+                    }
+                }
+            }
+
+            playTone(freq, type, duration, vol = 0.1) {
+                if (!this.enabled || !this.ctx) return;
+                try {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                    gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + duration);
+                } catch(e) {}
+            }
+
+            playDrop() {
+                this.playTone(300 + Math.random() * 80, 'sine', 0.1, 0.08);
+            }
+
+            playMerge(level) {
+                const baseFreq = 220 + level * 110;
+                this.playTone(baseFreq, 'sine', 0.15, 0.12);
+                setTimeout(() => this.playTone(baseFreq * 1.25, 'sine', 0.15, 0.12), 60);
+            }
+
+            playAcceptancePop() {
+                this.playTone(523.25, 'triangle', 0.15, 0.15);
+                setTimeout(() => this.playTone(659.25, 'triangle', 0.15, 0.15), 80);
+                setTimeout(() => this.playTone(783.99, 'triangle', 0.25, 0.18), 160);
+            }
+
+            playWind() {
+                this.playTone(180, 'sawtooth', 0.3, 0.15);
+                setTimeout(() => this.playTone(320, 'sine', 0.2, 0.1), 100);
+            }
+
+            playGameOver() {
+                this.playTone(300, 'sawtooth', 0.2, 0.1);
+                setTimeout(() => this.playTone(220, 'sawtooth', 0.2, 0.1), 150);
+                setTimeout(() => this.playTone(150, 'sawtooth', 0.4, 0.1), 300);
+            }
+        }
+
+        const audio = new SoundFX();
+
+        let canvas, ctx;
+        let canvasWidth = 0;
+        let canvasHeight = 0;
+
+        let score = 0;
+        let bestScore = 0;
+        let combo = 0;
+        let maxCombo = 0;
+        let mergeCount = 0;
+        let acceptanceCount = 0;
+
+        let shockwaveCharges = 3;
+        let gameDifficultyLevel = 1;
+        let dynamicGravity = 0.38;
+        let dynamicBounce = 0.45;
+        let dynamicFriction = 0.98;
+
+        let bubbles = [];
+        let particles = [];
+        let floatingTexts = [];
+
+        let currentBubbleLevel = 1;
+        let nextBubbleLevel = 1;
+        let dropX = 0;
+
+        let canDrop = true;
+        let isGameOver = false;
+        let isPaused = false;
+        let lineOverTime = 0;
+        const LIMIT_LINE_Y = 60;
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function toggleAudio() {
+            audio.init();
+            audio.enabled = !audio.enabled;
+            const text = audio.enabled ? "🔊 소리 쾀" : "🔇 음소거";
+            document.getElementById('audio-toggle-btn').textContent = text;
+        }
+
+        function loadBestScore() {
+            try {
+                const saved = localStorage.getItem('bubble_master_best_score');
+                if (saved) bestScore = parseInt(saved, 10) || 0;
+            } catch (e) {}
+            document.getElementById('best-score-display').textContent = bestScore;
+        }
+
+        function saveBestScore() {
+            if (score > bestScore) {
+                bestScore = score;
+                try {
+                    localStorage.setItem('bubble_master_best_score', bestScore);
+                } catch (e) {}
+                document.getElementById('best-score-display').textContent = bestScore;
+            }
+        }
+
+        function initCanvas() {
+            const container = document.getElementById('canvas-container');
+            canvas = document.getElementById('game-canvas');
+            ctx = canvas.getContext('2d');
+
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+
+            canvas.addEventListener('pointermove', handlePointerMove);
+            canvas.addEventListener('pointerdown', handlePointerDown);
+        }
+
+        function resizeCanvas() {
+            const container = document.getElementById('canvas-container');
+            if (!container) return;
+
+            canvasWidth = container.clientWidth;
+            canvasHeight = container.clientHeight;
+
+            canvas.width = canvasWidth;
+            canvas.height = canvasHeight;
+
+            if (dropX === 0) dropX = canvasWidth / 2;
+        }
+
+        class Bubble {
+            constructor(x, y, level, vx = 0, vy = 0) {
+                this.x = x;
+                this.y = y;
+                this.level = level;
+                this.stageData = STAGES[level - 1];
+                this.radius = this.stageData.radius;
+                this.vx = vx;
+                this.vy = vy;
+                this.friction = dynamicFriction;
+                this.bounce = dynamicBounce;
+                this.isStatic = false;
+                this.scale = 0;
+                
+                // Unpredictable subtle floating oscillation physics
+                this.wobblePhase = Math.random() * Math.PI * 2;
+                this.wobbleSpeed = 0.03 + Math.random() * 0.04;
+                this.wobbleAmp = 0.02 + Math.random() * 0.03;
+            }
+
+            update() {
+                if (this.scale < 1) {
+                    this.scale += 0.1;
+                    if (this.scale > 1) this.scale = 1;
+                }
+
+                if (this.isStatic) return;
+
+                // Dynamic Gravity applied
+                this.vy += dynamicGravity;
+
+                // Apply Velocity and Friction
+                this.vx *= this.friction;
+                this.vy *= this.friction;
+
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // Wall Collision Boundaries
+                if (this.x - this.radius < 0) {
+                    this.x = this.radius;
+                    this.vx *= -this.bounce;
+                } else if (this.x + this.radius > canvasWidth) {
+                    this.x = canvasWidth - this.radius;
+                    this.vx *= -this.bounce;
+                }
+
+                // Floor Collision Boundary
+                if (this.y + this.radius > canvasHeight) {
+                    this.y = canvasHeight - this.radius;
+                    this.vy *= -this.bounce;
+                    this.vx *= 0.88;
+                }
+
+                // Bubble Floating Wobble Effect
+                this.wobblePhase += this.wobbleSpeed;
+            }
+
+            draw() {
+                const currentScale = this.scale + Math.sin(this.wobblePhase) * this.wobbleAmp;
+                const r = this.radius * currentScale;
+                ctx.save();
+                ctx.translate(this.x, this.y);
+
+                // Bubble Outer Glow / Gradient Body
+                const grad = ctx.createRadialGradient(-r * 0.3, -r * 0.3, r * 0.1, 0, 0, r);
+                grad.addColorStop(0, '#ffffff');
+                grad.addColorStop(0.4, this.stageData.color);
+                grad.addColorStop(1, this.stageData.stroke);
+
+                ctx.beginPath();
+                ctx.arc(0, 0, r, 0, Math.PI * 2);
+                ctx.fillStyle = grad;
+                ctx.fill();
+
+                ctx.lineWidth = 2.5;
+                ctx.strokeStyle = this.stageData.stroke;
+                ctx.stroke();
+
+                // Bubble Shiny Highlight Arc
+                ctx.beginPath();
+                ctx.arc(-r * 0.35, -r * 0.35, r * 0.4, Math.PI * 1.1, Math.PI * 1.7);
+                ctx.lineWidth = 2.5;
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
+                ctx.stroke();
+
+                // Stage Emoji & Text Label
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.font = `${r * 0.85}px system-ui`;
+                ctx.fillText(this.stageData.emoji, 0, -r * 0.08);
+
+                ctx.font = `bold ${Math.max(10, r * 0.32)}px system-ui`;
+                ctx.fillStyle = '#1e1b4b';
+                ctx.fillText(this.stageData.name, 0, r * 0.52);
+
+                ctx.restore();
+            }
+        }
+
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                this.radius = Math.random() * 4 + 2;
+                this.vx = (Math.random() - 0.5) * 8;
+                this.vy = (Math.random() - 0.5) * 8;
+                this.alpha = 1;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.alpha -= 0.03;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = Math.max(0, this.alpha);
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        class FloatingText {
+            constructor(x, y, text, color) {
+                this.x = x;
+                this.y = y;
+                this.text = text;
+                this.color = color;
+                this.alpha = 1;
+            }
+
+            update() {
+                this.y -= 1.2;
+                this.alpha -= 0.025;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = Math.max(0, this.alpha);
+                ctx.font = 'bold 16px system-ui';
+                ctx.fillStyle = this.color;
+                ctx.textAlign = 'center';
+                ctx.fillText(this.text, this.x, this.y);
+                ctx.restore();
+            }
+        }
+
+        function createPopParticles(x, y, color, count = 12) {
+            for (let i = 0; i < count; i++) {
+                particles.push(new Particle(x, y, color));
+            }
+        }
+
+        function handlePointerMove(e) {
+            if (!canDrop || isPaused || isGameOver) return;
+            const rect = canvas.getBoundingClientRect();
+            dropX = e.clientX - rect.left;
+
+            const radius = STAGES[currentBubbleLevel - 1].radius;
+            if (dropX < radius) dropX = radius;
+            if (dropX > canvasWidth - radius) dropX = canvasWidth - radius;
+        }
+
+        function handlePointerDown(e) {
+            if (!canDrop || isPaused || isGameOver) return;
+            handlePointerMove(e);
+            dropBubble();
+        }
+
+        function dropBubble() {
+            canDrop = false;
+            audio.playDrop();
+
+            const radius = STAGES[currentBubbleLevel - 1].radius;
+            // Add subtle random sideways trajectory for extra physical difficulty
+            const initialVx = (Math.random() - 0.5) * (gameDifficultyLevel * 1.2);
+            const newBubble = new Bubble(dropX, LIMIT_LINE_Y + radius, currentBubbleLevel, initialVx);
+            bubbles.push(newBubble);
+
+            // Set Next Spawn Bubble
+            currentBubbleLevel = nextBubbleLevel;
+            nextBubbleLevel = getRandomNextLevel();
+            updatePreviewUI();
+
+            // Dynamic Cooldown Timer based on Score & Level
+            const coolDown = Math.max(300, 520 - gameDifficultyLevel * 45);
+            setTimeout(() => {
+                canDrop = true;
+            }, coolDown);
+        }
+
+        function getRandomNextLevel() {
+            const rand = Math.random();
+
+            // As difficulty level grows, spawn higher level bubbles (Lv.1 to Lv.4)
+            if (gameDifficultyLevel === 1) {
+                if (rand < 0.60) return 1;
+                if (rand < 0.90) return 2;
+                return 3;
+            } else if (gameDifficultyLevel === 2) {
+                if (rand < 0.45) return 1;
+                if (rand < 0.75) return 2;
+                if (rand < 0.93) return 3;
+                return 4; // Level 4 bubble rare drop!
+            } else { // Hard Mode (Level 3+)
+                if (rand < 0.35) return 1;
+                if (rand < 0.65) return 2;
+                if (rand < 0.88) return 3;
+                return 4;
+            }
+        }
+
+        function updateDifficulty() {
+            let newLevel = 1;
+            let levelLabel = "LV.1 Normal";
+
+            if (score >= 1200) {
+                newLevel = 3;
+                levelLabel = "LV.3 Extreme 🔥";
+                dynamicGravity = 0.52;
+                dynamicBounce = 0.65;
+            } else if (score >= 500) {
+                newLevel = 2;
+                levelLabel = "LV.2 Hard ⚡";
+                dynamicGravity = 0.45;
+                dynamicBounce = 0.55;
+            } else {
+                newLevel = 1;
+                levelLabel = "LV.1 Normal";
+                dynamicGravity = 0.38;
+                dynamicBounce = 0.45;
+            }
+
+            if (newLevel !== gameDifficultyLevel) {
+                gameDifficultyLevel = newLevel;
+                floatingTexts.push(new FloatingText(canvasWidth / 2, LIMIT_LINE_Y + 40, `난이도 상승! ${levelLabel}`, '#ef4444'));
+            }
+
+            const badgeEl = document.getElementById('diff-level-badge');
+            if (badgeEl) badgeEl.textContent = levelLabel;
+        }
+
+        function triggerShockwave() {
+            if (shockwaveCharges <= 0 || isPaused || isGameOver) return;
+
+            shockwaveCharges--;
+            document.getElementById('shake-btn').textContent = `💨 바람 (${shockwaveCharges})`;
+            if (shockwaveCharges === 0) {
+                document.getElementById('shake-btn').style.opacity = '0.5';
+            }
+
+            audio.playWind();
+
+            // Apply random upward & lateral impulse forces to all bubbles
+            for (let b of bubbles) {
+                b.vy -= 4.5 + Math.random() * 4;
+                b.vx += (Math.random() - 0.5) * 8;
+            }
+
+            floatingTexts.push(new FloatingText(canvasWidth / 2, canvasHeight / 2, "💨 바람 충격파!", "#f59e0b"));
+        }
+
+        function updatePreviewUI() {
+            const stage = STAGES[nextBubbleLevel - 1];
+            const previewEl = document.getElementById('next-bubble-preview');
+            previewEl.style.background = stage.color;
+            previewEl.textContent = stage.emoji;
+        }
+
+        function handleCollisions() {
+            for (let i = 0; i < bubbles.length; i++) {
+                for (let j = i + 1; j < bubbles.length; j++) {
+                    const b1 = bubbles[i];
+                    const b2 = bubbles[j];
+
+                    const dx = b2.x - b1.x;
+                    const dy = b2.y - b1.y;
+                    const dist = Math.hypot(dx, dy);
+                    const minDist = b1.radius + b2.radius;
+
+                    if (dist < minDist) {
+                        // Check Merge Condition: Same Level
+                        if (b1.level === b2.level && !b1.isMerged && !b2.isMerged) {
+                            mergeBubbles(i, j, b1, b2);
+                            return;
+                        }
+
+                        // Rigid Physics Collision Response with dynamic bouncing
+                        const angle = Math.atan2(dy, dx);
+                        const overlap = minDist - dist;
+
+                        const mx = Math.cos(angle) * overlap * 0.5;
+                        const my = Math.sin(angle) * overlap * 0.5;
+
+                        b1.x -= mx;
+                        b1.y -= my;
+                        b2.x += mx;
+                        b2.y += my;
+
+                        const normalX = dx / (dist || 1);
+                        const normalY = dy / (dist || 1);
+                        const kx = b1.vx - b2.vx;
+                        const ky = b1.vy - b2.vy;
+                        const p = 2 * (normalX * kx + normalY * ky) / 2;
+
+                        b1.vx -= p * normalX * (b1.bounce + 0.1);
+                        b1.vy -= p * normalY * (b1.bounce + 0.1);
+                        b2.vx += p * normalX * (b2.bounce + 0.1);
+                        b2.vy += p * normalY * (b2.bounce + 0.1);
+                    }
+                }
+            }
+        }
+
+        function mergeBubbles(i, j, b1, b2) {
+            const midX = (b1.x + b2.x) / 2;
+            const midY = (b1.y + b2.y) / 2;
+            const currentLevel = b1.level;
+
+            // Remove merged bubbles
+            bubbles.splice(j, 1);
+            bubbles.splice(i, 1);
+
+            mergeCount++;
+            combo++;
+            if (combo > maxCombo) maxCombo = combo;
+
+            if (currentLevel === 5) {
+                // Final Stage [수용] Merged -> Explodes with Peace Bonus!
+                acceptanceCount++;
+                const bonusScore = 200 + (combo > 1 ? combo * 50 : 0);
+                score += bonusScore;
+
+                audio.playAcceptancePop();
+                createPopParticles(midX, midY, '#a855f7', 25);
+                floatingTexts.push(new FloatingText(midX, midY, `🕊️ 수용 완결! +${bonusScore}`, '#8b5cf6'));
+
+            } else {
+                // Upgrade to Next Stage Bubble
+                const nextLevel = currentLevel + 1;
+                const nextStage = STAGES[nextLevel - 1];
+                const addedScore = nextStage.score + (combo > 1 ? combo * 10 : 0);
+                score += addedScore;
+
+                audio.playMerge(nextLevel);
+                createPopParticles(midX, midY, nextStage.stroke, 15);
+                floatingTexts.push(new FloatingText(midX, midY, `+${addedScore}${combo > 1 ? ` Combo x${combo}` : ''}`, '#7c3aed'));
+
+                const mergedBubble = new Bubble(midX, midY, nextLevel, (Math.random() - 0.5) * 2, -2.5);
+                bubbles.push(mergedBubble);
+            }
+
+            document.getElementById('score-display').textContent = score;
+            updateDifficulty();
+            saveBestScore();
+        }
+
+        function checkLimitLine() {
+            let isOverflowing = false;
+
+            for (let b of bubbles) {
+                if (b.y - b.radius < LIMIT_LINE_Y && Math.abs(b.vy) < 0.5) {
+                    isOverflowing = true;
+                    break;
+                }
+            }
+
+            if (isOverflowing) {
+                lineOverTime += 0.016;
+                if (lineOverTime > 2.0) { // Slightly stricter 2.0s limit in harder modes
+                    triggerGameOver();
+                }
+            } else {
+                lineOverTime = Math.max(0, lineOverTime - 0.02);
+            }
+        }
+
+        function gameLoop() {
+            if (isPaused || isGameOver) return;
+
+            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+            // Draw Limit Boundary Red Line
+            ctx.save();
+            ctx.setLineDash([6, 6]);
+            ctx.beginPath();
+            ctx.moveTo(0, LIMIT_LINE_Y);
+            ctx.lineTo(canvasWidth, LIMIT_LINE_Y);
+            ctx.strokeStyle = lineOverTime > 0.8 ? 'rgba(239, 68, 68, 0.9)' : 'rgba(239, 68, 68, 0.4)';
+            ctx.lineWidth = lineOverTime > 0.8 ? 3.5 : 1.5;
+            ctx.stroke();
+            ctx.restore();
+
+            // Draw Aiming Guide Bubble on Top
+            if (canDrop) {
+                const currentStage = STAGES[currentBubbleLevel - 1];
+                ctx.save();
+                ctx.globalAlpha = 0.6;
+                ctx.beginPath();
+                ctx.arc(dropX, LIMIT_LINE_Y, currentStage.radius, 0, Math.PI * 2);
+                ctx.fillStyle = currentStage.color;
+                ctx.fill();
+                ctx.strokeStyle = currentStage.stroke;
+                ctx.stroke();
+
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.font = `${currentStage.radius * 0.8}px system-ui`;
+                ctx.fillText(currentStage.emoji, dropX, LIMIT_LINE_Y);
+                ctx.restore();
+            }
+
+            // Update & Draw Physics Bubbles
+            for (let b of bubbles) {
+                b.update();
+                b.draw();
+            }
+
+            handleCollisions();
+            checkLimitLine();
+
+            // Update & Draw Visual FX
+            for (let i = particles.length - 1; i >= 0; i--) {
+                particles[i].update();
+                particles[i].draw();
+                if (particles[i].alpha <= 0) particles.splice(i, 1);
+            }
+
+            for (let i = floatingTexts.length - 1; i >= 0; i--) {
+                floatingTexts[i].update();
+                floatingTexts[i].draw();
+                if (floatingTexts[i].alpha <= 0) floatingTexts.splice(i, 1);
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        function startGame() {
+            audio.init();
+            score = 0;
+            combo = 0;
+            maxCombo = 0;
+            mergeCount = 0;
+            acceptanceCount = 0;
+            shockwaveCharges = 3;
+            gameDifficultyLevel = 1;
+            dynamicGravity = 0.38;
+            dynamicBounce = 0.45;
+
+            bubbles = [];
+            particles = [];
+            floatingTexts = [];
+            canDrop = true;
+            isGameOver = false;
+            isPaused = false;
+            lineOverTime = 0;
+
+            currentBubbleLevel = 1;
+            nextBubbleLevel = getRandomNextLevel();
+
+            document.getElementById('score-display').textContent = '0';
+            const shakeBtn = document.getElementById('shake-btn');
+            if (shakeBtn) {
+                shakeBtn.textContent = "💨 바람 (3)";
+                shakeBtn.style.opacity = "1";
+            }
+
+            updateDifficulty();
+            updatePreviewUI();
+            loadBestScore();
+
+            showScreen('game-screen');
+
+            setTimeout(() => {
+                resizeCanvas();
+                requestAnimationFrame(gameLoop);
+            }, 100);
+        }
+
+        function pauseGame() {
+            if (isGameOver) return;
+            isPaused = true;
+            document.getElementById('pause-modal').style.display = 'flex';
+        }
+
+        function resumeGame() {
+            isPaused = false;
+            document.getElementById('pause-modal').style.display = 'none';
+            requestAnimationFrame(gameLoop);
+        }
+
+        function quitGame() {
+            isPaused = false;
+            isGameOver = true;
+            document.getElementById('pause-modal').style.display = 'none';
+            document.getElementById('result-modal').style.display = 'none';
+            showScreen('title-screen');
+        }
+
+        function restartGame() {
+            document.getElementById('result-modal').style.display = 'none';
+            startGame();
+        }
+
+        function triggerGameOver() {
+            isGameOver = true;
+            audio.playGameOver();
+
+            let grade = 'C';
+            let comment = '죽음 적응 5단계 특성을 도감에서 다시 학습해보세요!';
+
+            if (score >= 1500) {
+                grade = 'S';
+                comment = '명예의 전당! 퀴블러-로스의 5단계 심리를 완벽히 정복하셨습니다!';
+            } else if (score >= 1000) {
+                grade = 'A';
+                comment = '훌륭합니다! 각 단계별 감정과 수용 과정을 잘 이해하셨네요.';
+            } else if (score >= 500) {
+                grade = 'B';
+                comment = '양호합니다! 5단계 [수용] 완성을 더 자주 도전해보세요.';
+            }
+
+            document.getElementById('result-grade').textContent = grade;
+            document.getElementById('result-comment').textContent = comment;
+            document.getElementById('res-score').textContent = score;
+            document.getElementById('res-combo').textContent = maxCombo;
+            document.getElementById('res-merges').textContent = mergeCount;
+            document.getElementById('res-accepts').textContent = acceptanceCount;
+
+            document.getElementById('result-modal').style.display = 'flex';
+        }
+
+        function openDict() {
+            document.getElementById('dict-modal').style.display = 'flex';
+        }
+
+        function closeDict() {
+            document.getElementById('dict-modal').style.display = 'none';
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initCanvas();
+            loadBestScore();
+        });
+    </script>
+</body>
+</html>
